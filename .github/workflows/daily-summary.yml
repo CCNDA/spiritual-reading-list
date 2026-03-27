@@ -1,0 +1,43 @@
+name: 每日進度摘要
+
+on:
+  schedule:
+    - cron: '0 13 * * *'  # 每天台灣時間晚上 9:00（UTC+8 = UTC 13:00）
+  workflow_dispatch:
+
+jobs:
+  daily-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 統計今日提交
+        id: stats
+        run: |
+          COUNT=$(git log --oneline --since="24 hours ago" | wc -l)
+          COMMITS=$(git log --oneline --since="24 hours ago" --pretty=format:"• %s" | head -5 || echo "今日無新提交")
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "date=$(date '+%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: 發送每日摘要到 Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -s -H "Content-Type: application/json" -d '{
+            "embeds": [{
+              "title": "📊 屬靈共同書目 每日進度摘要",
+              "color": 3066993,
+              "fields": [
+                {"name": "📅 日期", "value": "${{ steps.stats.outputs.date }}", "inline": false},
+                {"name": "✅ 今日提交數", "value": "${{ steps.stats.outputs.count }} 筆", "inline": true},
+                {"name": "📝 提交記錄", "value": "${{ steps.stats.outputs.commits }}", "inline": false}
+              ],
+              "footer": {"text": "CCNDA · 屬靈共同書目 · 每日自動摘要"}
+            }]
+          }' "$DISCORD_WEBHOOK"
