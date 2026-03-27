@@ -1,0 +1,52 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family: "Noto Sans TC", sans-serif; background: #f8f7f5; color: #333; }
+
+.container { max-width: 1000px; margin: 0 auto; padding: 0 1rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+
+/* 導覽列 */
+.navbar { background: #2d2a5e; color: #fff; padding: 0.75rem 0; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.brand { color: #fff; text-decoration: none; font-size: 1.1rem; font-weight: 700; }
+.nav-links a { color: rgba(255,255,255,.85); text-decoration: none; margin-left: 1.2rem; font-size: .9rem; }
+.nav-links a:hover { color: #fff; }
+
+/* 搜尋 */
+.search-wrap { margin-bottom: 1.25rem; }
+.search-input { width: 100%; padding: .6rem 1rem; border: 1px solid #ddd; border-radius: 8px; font-size: .9rem; outline: none; transition: border .2s; }
+.search-input:focus { border-color: #2d2a5e; }
+
+/* 分類標籤 */
+.category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.5rem; }
+.tab { padding: .35rem .9rem; border: 1px solid #ccc; border-radius: 20px; background: #fff; font-size: .82rem; cursor: pointer; transition: all .15s; color: #555; }
+.tab:hover, .tab.active { background: #2d2a5e; color: #fff; border-color: #2d2a5e; }
+.count { opacity: .7; font-size: .75rem; }
+
+/* 書單格 */
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; }
+.book-card { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; padding: 1rem; cursor: pointer; transition: box-shadow .2s, border-color .2s; }
+.book-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); border-color: #b0aede; }
+.book-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: .75rem; }
+.book-cat { font-size: .75rem; color: #2d2a5e; font-weight: 600; margin-bottom: .3rem; }
+.book-title { font-size: .95rem; font-weight: 700; color: #222; margin-bottom: .2rem; }
+.book-author { font-size: .82rem; color: #777; }
+.book-rec { font-size: .75rem; color: #aaa; margin-top: .5rem; }
+
+/* Modal */
+.modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal.hidden { display: none; }
+.modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+.modal-content { position: relative; z-index: 1; background: #fff; border-radius: 14px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 2rem; }
+.modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #999; }
+.review-item { border-bottom: 1px solid #f0f0f0; padding: .75rem 0; }
+.review-name { font-weight: 600; font-size: .88rem; }
+.review-stars { color: #f59e0b; font-size: .85rem; }
+.review-text { font-size: .85rem; color: #555; margin-top: .25rem; }
+.review-form input, .review-form textarea, .review-form select { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: .5rem .75rem; margin-bottom: .6rem; font-size: .88rem; font-family: inherit; }
+.btn { background: #2d2a5e; color: #fff; border: none; border-radius: 6px; padding: .55rem 1.2rem; font-size: .88rem; cursor: pointer; }
+.btn:hover { background: #3f3b8a; }
+.loading, .empty { text-align: center; color: #aaa; padding: 3rem 0; }
+
+/* 頁尾 */
+.footer { text-align: center; color: #bbb; font-size: .8rem; padding: 2rem 0; }
