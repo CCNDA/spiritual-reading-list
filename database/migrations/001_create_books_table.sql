@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS book_subjects (
 -- =============================================
 CREATE TABLE IF NOT EXISTS formats (
     format_id     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    edition_id    INT UNSIGNED NOT NULL,
+    edition_id    INT UNSIGNEH NOT NULL,
     media_type    ENUM('紙本','電子','有聲','其他') NOT NULL COMMENT '媒介類型',
     file_format   VARCHAR(50)           COMMENT 'EPUB/PDF/MOBI/MP3等',
     sku           VARCHAR(100)          COMMENT '內部SKU',
@@ -266,5 +266,54 @@ INSERT INTO subjects (scheme, label) VALUES
 ('自訂', '基督教歷史'),
 ('自訂', '靈性成長'),
 ('自訂', '宣教與事工'),
-('自訂', '基督教育'),
+('自訂', '基督教教育'),
 ('自訂', '婚姻與家庭');
+
+
+-- =============================================
+-- 16. 會員主表 Members
+--     只以 email 識別身份，不蒐集個資
+-- =============================================
+CREATE TABLE IF NOT EXISTS members (
+    member_id   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    email       VARCHAR(320) NOT NULL UNIQUE          COMMENT 'Email（唯一識別碼）',
+    status      ENUM('active','inactive','banned') NOT NULL DEFAULT 'active',
+    email_verified TINYINT(1) NOT NULL DEFAULT 0      COMMENT '是否已驗證 email',
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at DATETIME                              COMMENT '最後活動時間'
+) ENGINE=InnoDB COMMENT='會員主表（僅 email，無其他個資）';
+
+
+-- =============================================
+-- 17. 登入 Token 表 MemberTokens
+--     Magic Link / OTP 無密碼登入
+-- =============================================
+CREATE TABLE IF NOT EXISTS member_tokens (
+    token_id    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    member_id   INT UNSIGNED NOT NULL,
+    token       VARCHAR(128) NOT NULL UNIQUE           COMMENT '隨機 token',
+    token_type  ENUM('login','verify_email') NOT NULL DEFAULT 'login',
+    expires_at  DATETIME NOT NULL                      COMMENT '過期時間（建議 15 分鐘）',
+    used_at     DATETIME                               COMMENT '使用時間（一次性）',
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE CASCADE,
+    INDEX idx_token (token),
+    INDEX idx_expires (expires_at)
+) ENGINE=InnoDB COMMENT='Magic Link 登入 Token 表';
+
+
+-- =============================================
+-- 18. 書架/書單表 MemberShelves
+--     會員的讀書狀態（想讀/讀中/已讀）與收藏
+-- =============================================
+CREATE TABLE IF NOT EXISTS member_shelves (
+    shelf_id    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    member_id   INT UNSIGNED NOT NULL,
+    book_id     INT UNSIGNED NOT NULL,
+    shelf_type  ENUM('want','reading','read','favorite') NOT NULL COMMENT '想讀/讀中/已讀/收藏',
+    added_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    note        TEXT                                    COMMENT '私人備注',
+    UNIQUE KEY uq_member_book (member_id, book_id),
+    FOREIGN KEY (member_id) REFERENCES members(member_id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='會員書架（讀書狀態）';
