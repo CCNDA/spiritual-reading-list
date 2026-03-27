@@ -1,0 +1,67 @@
+name: Discord 進度通知
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+    inputs:
+      message:
+        description: '手動通知訊息'
+        required: false
+        default: '手動觸發進度更新'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: 取得 Commit 資訊
+        id: commit
+        run: |
+          echo "message=$(git log -1 --pretty=format:'%s')" >> $GITHUB_OUTPUT
+          echo "author=$(git log -1 --pretty=format:'%an')" >> $GITHUB_OUTPUT
+          echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+          echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: 發送 Discord 通知（Push）
+        if: github.event_name == 'push'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -s -H "Content-Type: application/json" -d '{
+            "embeds": [{
+              "title": "🚀 屬靈共同書目 有新提交",
+              "color": 3447003,
+              "fields": [
+                {"name": "📌 提交訊息", "value": "${{ steps.commit.outputs.message }}", "inline": false},
+                {"name": "🌿 分支", "value": "`${{ steps.commit.outputs.branch }}`", "inline": true},
+                {"name": "👤 提交者", "value": "${{ steps.commit.outputs.author }}", "inline": true},
+                {"name": "🔖 Commit", "value": "[`${{ steps.commit.outputs.sha }}`](https://github.com/CCNDA/spiritual-reading-list/commit/${{ steps.commit.outputs.sha }})", "inline": true}
+              ],
+              "footer": {"text": "CCNDA · 屬靈共同書目"}
+            }]
+          }' "$DISCORD_WEBHOOK"
+
+      - name: 發送 Discord 通知（手動）
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -s -H "Content-Type: application/json" -d '{
+            "embeds": [{
+              "title": "📢 屬靈共同書目 手動通知",
+              "color": 15844367,
+              "fields": [
+                {"name": "📌 訊息", "value": "${{ github.event.inputs.message }}", "inline": false},
+                {"name": "🌿 分支", "value": "`${{ steps.commit.outputs.branch }}`", "inline": true},
+                {"name": "👤 觸發者", "value": "${{ github.actor }}", "inline": true}
+              ],
+              "footer": {"text": "CCNDA · 屬靈共同書目"}
+            }]
+          }' "$DISCORD_WEBHOOK"
