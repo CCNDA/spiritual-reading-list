@@ -71,7 +71,7 @@ chore: 其他雜項
 
 ### 資料庫
 
-- 資料庫: MySQL 8.x
+- 資料庫: MariaDB 10.11.13
 - 編碼: utf8mb4
 - Collation: utf8mb4_unicode_ci
 
